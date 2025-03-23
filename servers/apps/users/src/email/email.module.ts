@@ -3,8 +3,8 @@ import { EmailService } from './email.service';
 import { MailerModule } from '@nestjs-modules/mailer';
 import { ConfigService } from '@nestjs/config';
 import { join } from 'path';
-import { EjsAdapter } from '@nestjs-modules/mailer/dist/adapters/ejs.adapter';
-
+// import { EjsAdapter } from '@nestjs-modules/mailer/dist/adapters/ejs.adapter';
+import { HandlebarsAdapter } from '@nestjs-modules/mailer/dist/adapters/handlebars.adapter';
 @Global()
 @Module({
   imports: [
@@ -18,11 +18,11 @@ import { EjsAdapter } from '@nestjs-modules/mailer/dist/adapters/ejs.adapter';
             pass: config.get<string>('SMTP_PASSWORD'),
           },
           defaults: {
-            from: '',
+            from: 'jonettapekk@gmail.com',
           },
           template: {
             dir: join(process.cwd(), 'apps/users/email-templates'),
-            adapter: new EjsAdapter(),
+            adapter: new HandlebarsAdapter(),
             options: {
               strict: false,
             },

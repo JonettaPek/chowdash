@@ -1,7 +1,7 @@
 import { Args, Context, Mutation, Query, Resolver } from '@nestjs/graphql';
 import { UserService } from './user.service';
-import { RegisterResponse } from './types/user.type';
-import { RegisterDto } from './dto/user.dto';
+import { ActivateAccountResponse, RegisterResponse } from './types/user.type';
+import { ActivateAccountDto, RegisterDto } from './dto/user.dto';
 import { Response } from 'express';
 import { BadRequestException, UseFilters } from '@nestjs/common';
 import { User } from './entities/user.entity';
@@ -25,16 +25,22 @@ export class UserResolver {
       throw new BadRequestException('Please fill in all the fields');
     }
     const data = await this.userService.register(registerDto, context.res);
-    const user = data.user;
-    const mockUser = {
-      ...user,
-      id: '123',
-      role: 'User',
-      createdAt: new Date(),
-      updatedAt: new Date(),
-    };
+    const activationToken = data.activationToken;
 
-    return { user: mockUser };
+    return { activation_token: activationToken };
+  }
+
+  @Mutation(() => ActivateAccountResponse)
+  async activateAccount(
+    @Args('activateAccountInput') activateAccountDto: ActivateAccountDto,
+    @Context() context: { res: Response },
+  ): Promise<ActivateAccountResponse> {
+    const data = await this.userService.activateAccount(
+      activateAccountDto,
+      context.res,
+    );
+    const user = data.persistedUser;
+    return { user };
   }
 
   @Query(() => [User])
