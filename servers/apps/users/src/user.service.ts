@@ -6,6 +6,7 @@ import { PrismaService } from '../../../prisma/prisma.service';
 import { Response } from 'express';
 import * as bcrypt from 'bcrypt';
 import { EmailService } from './email/email.service';
+import { TokenCreator } from './utils/createTokens';
 
 interface UserData {
   name: string;
@@ -65,7 +66,6 @@ export class UserService {
       activationCode,
     });
 
-    console.log(`register ${activationCode} ${activationToken}`);
     return { activationToken, response };
   }
 
@@ -80,7 +80,7 @@ export class UserService {
       },
       // option
       {
-        secret: this.configService.get<string>('JWT_SECRET'),
+        secret: this.configService.get<string>('ACTIVATION_TOKEN_SECRET'),
         expiresIn: '5m', // registered claims
       },
     );
@@ -93,19 +93,14 @@ export class UserService {
     accountActivationDto: ActivateAccountDto,
     response: Response,
   ) {
-    console.log(
-      `activate before: ${accountActivationDto.activationCode} ${accountActivationDto.activationToken}`,
-    );
     const { user, activationCode } = this.jwtService.verify<{
       user: UserData;
       activationCode: string;
     }>(accountActivationDto.activationToken, {
-      secret: this.configService.get<string>('JWT_SECRET'),
+      secret: this.configService.get<string>('ACTIVATION_TOKEN_SECRET'),
     });
 
-    console.log(`activate after: ${activationCode}`);
-
-    if (activationCode !== accountActivationDto.activationCode) {
+    if (accountActivationDto.activationCode !== activationCode) {
       throw new BadRequestException('Invalid activation code');
     }
 
@@ -122,13 +117,36 @@ export class UserService {
   }
 
   // login service
-  async login(loginDto: LoginDto) {
+  async login(loginDto: LoginDto, response: Response) {
     const { email, password } = loginDto;
-    const user = {
-      email,
-      password,
+    const user = await this.prisma.user.findUnique({
+      where: {
+        email,
+      },
+    });
+
+    if (user && (await this.isCorrectPassword(password, user.password))) {
+      const tokenCreator = new TokenCreator(
+        this.jwtService,
+        this.configService,
+      );
+      return { ...tokenCreator.createTokens(user), response };
+    }
+
+    return {
+      user: null,
+      accessToken: null,
+      refreshToken: null,
+      error: { message: 'Invalid credentials' },
+      response,
     };
-    return user;
+  }
+
+  async isCorrectPassword(
+    enteredPassword: string,
+    storedEncryptedPassword: string,
+  ): Promise<boolean> {
+    return await bcrypt.compare(enteredPassword, storedEncryptedPassword);
   }
 
   // get all users service

@@ -1,10 +1,14 @@
 import { Args, Context, Mutation, Query, Resolver } from '@nestjs/graphql';
 import { UserService } from './user.service';
-import { ActivateAccountResponse, RegisterResponse } from './types/user.type';
-import { ActivateAccountDto, RegisterDto } from './dto/user.dto';
+import {
+  ActivateAccountResponse,
+  LoginResponse,
+  RegisterResponse,
+} from './type/user.type';
+import { ActivateAccountDto, LoginDto, RegisterDto } from './dto/user.dto';
 import { Response } from 'express';
-import { BadRequestException, UseFilters } from '@nestjs/common';
-import { User } from './entities/user.entity';
+import { BadRequestException } from '@nestjs/common';
+import { User } from './entity/user.entity';
 
 @Resolver('User')
 // @UseFilters()
@@ -13,7 +17,7 @@ export class UserResolver {
 
   @Mutation(() => RegisterResponse)
   async register(
-    @Args('registerInput') registerDto: RegisterDto,
+    @Args('registerDto') registerDto: RegisterDto,
     @Context() context: { res: Response },
   ): Promise<RegisterResponse> {
     if (
@@ -32,7 +36,7 @@ export class UserResolver {
 
   @Mutation(() => ActivateAccountResponse)
   async activateAccount(
-    @Args('activateAccountInput') activateAccountDto: ActivateAccountDto,
+    @Args('activateAccountDto') activateAccountDto: ActivateAccountDto,
     @Context() context: { res: Response },
   ): Promise<ActivateAccountResponse> {
     const data = await this.userService.activateAccount(
@@ -41,6 +45,16 @@ export class UserResolver {
     );
     const user = data.persistedUser;
     return { user };
+  }
+
+  @Mutation(() => LoginResponse)
+  async login(
+    @Args('loginDto') loginDto: LoginDto,
+    @Context() context: { res: Response },
+  ): Promise<LoginResponse> {
+    const data = await this.userService.login(loginDto, context.res);
+    const { user, accessToken, refreshToken } = data;
+    return { user, accessToken, refreshToken };
   }
 
   @Query(() => [User])
