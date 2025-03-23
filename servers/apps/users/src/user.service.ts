@@ -35,12 +35,9 @@ export class UserService {
     if (isExistingEmail) {
       throw new BadRequestException('This email address is already in use.');
     }
-    const isExistingPhoneNumber = await this.prisma.user.findMany({
+    const isExistingPhoneNumber = await this.prisma.user.findUnique({
       where: {
-        phone_number: {
-          not: undefined,
-          in: [phone_number],
-        },
+        phone_number,
       },
     });
 
@@ -62,7 +59,7 @@ export class UserService {
     await this.emailService.sendAccountActivationEmail({
       recipientEmail: email,
       subject: 'Activate your acount',
-      template: './account-activation',
+      template: 'account-activation',
       name,
       activationCode,
     });

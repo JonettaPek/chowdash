@@ -18,10 +18,10 @@ import { EjsAdapter } from '@nestjs-modules/mailer/dist/adapters/ejs.adapter';
             pass: config.get<string>('SMTP_PASSWORD'),
           },
           defaults: {
-            from: 'Becodemy',
+            from: '',
           },
           template: {
-            dir: join(__dirname, '../../../../servers/email-templates'),
+            dir: join(process.cwd(), 'apps/users/email-templates'),
             adapter: new EjsAdapter(),
             options: {
               strict: false,
