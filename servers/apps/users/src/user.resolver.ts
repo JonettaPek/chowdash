@@ -7,8 +7,9 @@ import {
 } from './type/user.type';
 import { ActivateAccountDto, LoginDto, RegisterDto } from './dto/user.dto';
 import { Response } from 'express';
-import { BadRequestException } from '@nestjs/common';
+import { BadRequestException, UseGuards } from '@nestjs/common';
 import { User } from './entity/user.entity';
+import { AuthenticatedRequest, AuthGuard } from './guard/auth.guard';
 
 @Resolver('User')
 // @UseFilters()
@@ -53,7 +54,21 @@ export class UserResolver {
     @Context() context: { res: Response },
   ): Promise<LoginResponse> {
     const data = await this.userService.login(loginDto, context.res);
-    const { user, accessToken, refreshToken } = data;
+    const { user, accessToken, refreshToken, error } = data;
+    return { user, accessToken, refreshToken, error };
+  }
+
+  @Query(() => LoginResponse)
+  @UseGuards(AuthGuard)
+  getLoggedInUser(
+    @Context()
+    context: {
+      req: AuthenticatedRequest;
+    },
+  ) {
+    const user = context.req.user;
+    const accessToken = context.req.headers.authorization?.split(' ')[1];
+    const refreshToken = context.req.headers.refreshtoken;
     return { user, accessToken, refreshToken };
   }
 

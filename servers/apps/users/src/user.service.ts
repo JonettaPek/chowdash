@@ -88,7 +88,7 @@ export class UserService {
     return { activationCode, activationToken };
   }
 
-  // activate account
+  // activate account service
   async activateAccount(
     accountActivationDto: ActivateAccountDto,
     response: Response,

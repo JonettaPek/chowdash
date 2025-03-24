@@ -19,6 +19,9 @@ import { EmailService } from './email/email.service';
       autoSchemaFile: {
         federation: 2,
       },
+      // context: ({ req }) => {
+      //   return { req, user: req.user };
+      // },
     }),
     ConfigModule.forRoot({
       isGlobal: true,
