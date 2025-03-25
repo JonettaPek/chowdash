@@ -7,6 +7,7 @@ import { Response } from 'express';
 import * as bcrypt from 'bcrypt';
 import { EmailService } from './email/email.service';
 import { TokenCreator } from './utils/createTokens';
+import { AuthenticatedRequest } from './guard/auth.guard';
 
 interface UserData {
   name: string;
@@ -69,7 +70,7 @@ export class UserService {
     return { activationToken, response };
   }
 
-  createActivationCodeAndToken(user: UserData) {
+  private createActivationCodeAndToken(user: UserData) {
     const activationCode = Math.floor(1000 + Math.random() * 9000).toString(); // generate four-digit activation code (One-Time Password, OTP)
 
     const activationToken = this.jwtService.sign(
@@ -142,15 +143,24 @@ export class UserService {
     };
   }
 
-  async isCorrectPassword(
+  private async isCorrectPassword(
     enteredPassword: string,
     storedEncryptedPassword: string,
   ): Promise<boolean> {
     return await bcrypt.compare(enteredPassword, storedEncryptedPassword);
   }
 
-  // get all users service
-  async getUsers() {
-    return this.prisma.user.findMany({});
+  authenticateUser(req: AuthenticatedRequest) {
+    const user = req.user;
+    const accessToken = req.headers.authorization?.split(' ')[1];
+    const refreshToken = req.headers.refreshtoken;
+    return { user, accessToken, refreshToken };
+  }
+
+  logout(req: AuthenticatedRequest) {
+    req.user = undefined;
+    req.headers.authorization = undefined;
+    req.headers.refreshtoken = undefined;
+    return { message: 'Logout successfully' };
   }
 }

@@ -3,12 +3,12 @@ import { UserService } from './user.service';
 import {
   ActivateAccountResponse,
   LoginResponse,
+  LogoutResponse,
   RegisterResponse,
 } from './type/user.type';
 import { ActivateAccountDto, LoginDto, RegisterDto } from './dto/user.dto';
 import { Response } from 'express';
 import { BadRequestException, UseGuards } from '@nestjs/common';
-import { User } from './entity/user.entity';
 import { AuthenticatedRequest, AuthGuard } from './guard/auth.guard';
 
 @Resolver('User')
@@ -60,20 +60,23 @@ export class UserResolver {
 
   @Query(() => LoginResponse)
   @UseGuards(AuthGuard)
-  getLoggedInUser(
+  authenticateUser(
     @Context()
     context: {
       req: AuthenticatedRequest;
     },
   ) {
-    const user = context.req.user;
-    const accessToken = context.req.headers.authorization?.split(' ')[1];
-    const refreshToken = context.req.headers.refreshtoken;
-    return { user, accessToken, refreshToken };
+    return this.userService.authenticateUser(context.req);
   }
 
-  @Query(() => [User])
-  async getUsers() {
-    return this.userService.getUsers();
+  @Query(() => LogoutResponse)
+  @UseGuards(AuthGuard)
+  logout(
+    @Context()
+    context: {
+      req: AuthenticatedRequest;
+    },
+  ) {
+    return this.userService.logout(context.req);
   }
 }
