@@ -5,15 +5,17 @@ import { join } from "path";
 module.exports = {
   content: [join(
       __dirname,
-      "{src,app,components,screens}/**/*!(*.stories|*.spec).{ts,tsx,html}"
+      "{src,app,components,screens,providers}/**/*!(*.stories|*.spec).{ts,tsx,html}"
     ),
     "./node_modules/@heroui/theme/dist/**/*.{js,ts,jsx,tsx}"
   ],
   theme: {
     extend: {
       fontFamily: {
-        Poppins: ["var(--font-Poppins)"],
-        Inter: ["var(--font-inter)"],
+        sans: ["var(--font-geist-sans)", "sans-serif"],
+        mono: ["var(--font-geist-mono)", "monospace"],
+        poppins: ["var(--font-poppins)"],
+        inter: ["var(--font-inter)"],
       },
     },
   },
