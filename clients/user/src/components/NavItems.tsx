@@ -24,7 +24,7 @@ const navItems = [
     },
 ]
 
-const NavItems = ({ activeItem = 0 }: { activeItem?: number}) => {
+const NavItems = ({ activeItem = 0 }: { activeItem?: number }) => {
     return (<div className={`${styles.navItems}`}>
         {navItems.map((item, index) =>(
             <Link

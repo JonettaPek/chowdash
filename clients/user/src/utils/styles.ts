@@ -1,10 +1,11 @@
 const styles = {
   header:
     "w-full lg:h-[80px] bg-[#0F1524] flex flex-col items-center justify-between lg:flex-row",
-  logo: "font-poppins text-[25px] font-[500] px-[20px] text-transparent bg-clip-text bg-gradient-to-tr from-pink-500 to-yellow-500",
+  logo: "text-[25px] font-[500] px-[20px] text-transparent bg-clip-text bg-gradient-to-tr from-pink-500 to-yellow-500",
   navItems: "py-[20px] gap-[20px] flex flex-col lg:flex-row",
   navItem: "font-poppins text-[18px] font-[500] px-[20px]",
-  login: "bg-gradient-to-tr from-pink-500 to-yellow-500 text-white shadow-lg",
+  login:
+    "text-[18px] font-[300] bg-gradient-to-tr from-yellow-500 to-pink-500 text-white w-[100px]",
   form: "w-full justify-center items-center space-y-4",
   profileDropdown: "p-[20px]",
 
