@@ -1,4 +1,4 @@
-import { Button, PressEvent } from "@heroui/react";
+import { Button, PressEvent } from "@heroui/button";
 import styles from "../utils/styles";
 
 const LoginButton = ({ onOpen }: { onOpen: (e: PressEvent) => void}) => {

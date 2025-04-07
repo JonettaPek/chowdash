@@ -16,6 +16,9 @@ const styles = {
   loginModalLinks: "flex flex-col items-end gap-50",
   loginModalLink: "text-xs hover:text-yellow-500",
   loginModalCustomError: "text-danger text-xs pl-[4px]",
+  loginModalSocialTitle: "text-center font-[500]",
+  loginModalSocialIcons: "flex justify-center gap-4",
+  registerModalTerms: "flex flex-col gap-2",
 
   separator: "border-t border-gray-300 my-4",
 };
