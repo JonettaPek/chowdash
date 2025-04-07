@@ -1,9 +1,5 @@
-import Header from '../components/layout/Header';
-
 const HomeScreen = () => {
-    return (<>
-        <Header />
-    </>);
+    return (<p>Home</p>);
 }
 
 export default HomeScreen;

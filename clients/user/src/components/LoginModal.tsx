@@ -1,153 +1,148 @@
 'use client'
 
-import { Button, Form, Input, Modal, ModalBody, ModalContent, ModalFooter, ModalHeader } from "@heroui/react";
-import Link from "next/link";
+import { Button, Checkbox, Form, Input, Modal, ModalBody, ModalContent, ModalFooter, ModalHeader } from "@heroui/react";
 import styles from "../utils/styles";
 import { FormEvent, useState } from "react";
+import { useRouter } from "next/navigation";
+import { AiFillGithub } from "react-icons/ai";
+import { FcGoogle } from "react-icons/fc";
+
 
 const LoginModal = ({ isOpen, onOpenChange }: { isOpen: boolean, onOpenChange: (isOpen: boolean) => void }) => {
 
+    const router = useRouter();
 
+    const [email, setEmail] = useState<string>("");
     const [password, setPassword] = useState<string>("");
-    const [errors, setErrors] = useState<{name?: string, password?: string, terms?: string}>({});
-    const [submitted, setSubmitted] = useState<{name: string, email:string, password: string, terms: string} | null>(null);
+    const [isTermsSelected, setIsTermsSelected] = useState<boolean>(true);
+    const [errors, setErrors] = useState<{email?: string, password?: string, terms?: string}>({});
 
-    const getPasswordError = (value: string) => {
-        if (value.length < 8) {
-          return "Password must be 8 characters or more";
-        }
-        if ((value.match(/[A-Z]/g) || []).length < 1) {
-          return "Password needs at least 1 uppercase letter";
-        }
-        if ((value.match(/[^a-z]/gi) || []).length < 1) {
-          return "Password needs at least 1 symbol";
-        }
-    
-        return null;
-    };
-
-    const onSubmit = (e: FormEvent<HTMLFormElement>) => {
+    const onSubmit = (e: FormEvent<HTMLFormElement>, onClose: () => void) => {
         e.preventDefault();
-        const data = Object.fromEntries(new FormData(e.currentTarget)) as {name: string, email: string, password: string, terms: string};
-        console.log(data)
-        // Custom validation checks
-        const newErrors: { 
-          name: string,
-          password: string,
-          terms: string } = { 
-            name: "",
-            password: "",
-            terms: "",
-          };
-    
-        // Password validation
-        const passwordError = getPasswordError(data.password as string);
-    
-        if (passwordError) {
-          newErrors.password = passwordError;
+
+        if (!isTermsSelected) {
+            return;
         }
+
+        // const data = Object.fromEntries(new FormData(e.currentTarget)) as {email: string, password: string, terms: Terms}; // uncontrolled
+        const data = { email, password, termsAccepted: isTermsSelected } // controlled
     
-        // Username validation
-        if (data.name === "admin") {
-          newErrors.name = "Nice try! Choose a different username";
-        }
-    
-        if (Object.keys(newErrors).length > 0) {
-          setErrors(newErrors);
-    
-          return;
-        }
-    
-        if (data.terms !== "true") {
-          setErrors((prev) => ({...prev, terms: "Please accept the terms"}));
-    
-          return;
-        }
-    
-        // Clear errors and submit
-        setErrors({ 
-          name: "",
-          password: "",
-          terms: "",
-        });
-        setSubmitted(data);
+        setErrors({});
+        console.log(data);// call api
+        setEmail("");
+        setPassword("");
+        setIsTermsSelected(true);
+        onClose();
     };
 
     return (
         <Modal isOpen={isOpen} placement="auto" onOpenChange={onOpenChange}>
             <ModalContent>
-                {() => (<>
-                    <ModalHeader className="flex flex-col gap-1 items-center">Log In</ModalHeader>
+                {(onClose) => (<>
+                    <ModalHeader className={styles.loginModalHeader}>Log In</ModalHeader>
                     <ModalBody>
                         <Form
-                            className={`${styles.form}`}
-                            validationErrors={errors}
-                            onReset={() => setSubmitted(null)}
-                            onSubmit={onSubmit}
+                            className={`${styles.loginModalForm}`}
+                            validationErrors={errors} // validationErrors is used for server-side validation errors
+                            onSubmit={(e) => onSubmit(e, onClose)}
                             autoComplete="off"
                         >
-                            <div className="flex flex-col gap-4 w-[100%]">
+                            <div className={styles.loginModalFormInputs}>
                                 <Input
                                     isRequired
-                                    errorMessage={({validationDetails}) => {
-                                    if (validationDetails.valueMissing) {
-                                        return "Please enter your email";
-                                    }
-                                    if (validationDetails.typeMismatch) {
-                                        return "Please enter a valid email address";
-                                    }
-                                    }}
                                     label="Email"
                                     labelPlacement="outside"
                                     name="email"
                                     placeholder="Enter your email"
                                     type="email"
+                                    value={email}
+                                    onValueChange={(val) => setEmail(val)}
+                                    errorMessage={({validationDetails}) => { // errorMessage is used for real-time client-side validation
+                                        if (validationDetails.valueMissing) {
+                                            return "Please enter your email";
+                                        }
+                                        if (validationDetails.typeMismatch) {
+                                            return "Please enter a valid email address";
+                                        }
+                                    }}
                                 />
                                 <Input
                                     isRequired
-                                    errorMessage={({validationDetails}) => {
-                                    if (validationDetails.valueMissing) {
-                                        return "Please enter your password";
-                                    }
-                                    }}
-                                    // isInvalid={getPasswordError(password) !== null}
                                     label="Password"
                                     labelPlacement="outside"
                                     name="password"
                                     placeholder="Enter your password"
                                     type="password"
                                     value={password}
-                                    onValueChange={setPassword}
+                                    onValueChange={(val) => setPassword(val)}
+                                    errorMessage={({validationDetails}) => {
+                                        if (validationDetails.valueMissing) {
+                                            return "Please enter your password";
+                                        }
+                                    }}
                                 />
-                                <div>
-                                    <label className="text-xs">Forgot password? </label>
-                                    <Link
-                                    key="forgot-password"
-                                    href="/forgot-password"
-                                    className="text-xs hover:text-yellow-500"
+
+                                <div className="flex flex-col gap-2">
+                                    <Checkbox 
+                                        defaultSelected 
+                                        size="sm"
+                                        color="primary"
+                                        radius="sm"
+                                        isSelected={isTermsSelected}
+                                        onValueChange={(val) => setIsTermsSelected(val)}
                                     >
-                                    reset
-                                    </Link>
+                                        I agree to the terms and conditions
+                                    </Checkbox>
+                                    {!isTermsSelected && <span className={styles.loginModalCustomError}>{"Please accept the terms"}</span>}
                                 </div>
 
-                                {errors.terms && <span className="text-danger text-small">{errors.terms}</span>}
+                                {Object.entries(errors).map(([key, error]) => <div key={key}><span className={styles.loginModalCustomError}>{error}</span></div>)}
 
-                                <div className="flex gap-4">
-                                    <Button type="reset" variant="bordered">
-                                    Reset
-                                    </Button>
-                                    <Button className="w-full" color="primary" type="submit">
-                                    Submit
-                                    </Button>
+                                <div className={styles.loginModalFormButtons}>
+                                    <Button className="w-full" type="reset" variant="bordered">Reset</Button>
+                                    <Button className="w-full" color="primary" type="submit">Submit</Button>
+                                </div>
+
+                                <div className={styles.loginModalLinks}>
+                                    <div>
+                                        <label className="text-xs">Forgot password? </label>
+                                        <button
+                                            onClick={() => {
+                                                onClose()
+                                                router.push("/forgot-password")
+                                            }}
+                                            type="button"
+                                            className={styles.loginModalLink}
+                                        >
+                                        Reset
+                                        </button>
+                                    </div>
+                                    <div>
+                                        <label className="text-xs">Not a user? </label>
+                                        <button
+                                            onClick={() => {
+                                                onClose()
+                                                router.push("/register")
+                                            }}
+                                            type="button"
+                                            className={styles.loginModalLink}
+                                        >
+                                        Register
+                                        </button>
+                                    </div>
                                 </div>
                             </div>
-
-                            {submitted && (
-                            <div className="text-small text-default-500 mt-4">
-                                Submitted data: <pre>{JSON.stringify(submitted, null, 2)}</pre>
-                            </div>
-                            )}
                         </Form>
+                        <div className={styles.separator}></div>
+                        <h5 className="text-center font-[500]">Or join with</h5>
+                        <div className="flex justify-center gap-4">
+                            <a href="https://github.com/jonettapek" target="_blank">
+                                <AiFillGithub />
+                            </a>
+                            <a href="https://www.google.com" target="_blank">
+                                <FcGoogle />
+                            </a>
+                        </div>
                     </ModalBody>
                     <ModalFooter />
                 </>)}

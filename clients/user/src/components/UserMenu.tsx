@@ -13,11 +13,11 @@ import ProfileDropdown from "./ProfileDropdown";
 
 const UserMenu = () => {
   
-  const [signedIn, setSignedIn] = useState<boolean>(true);
+  const [signedIn, setSignedIn] = useState<boolean>(false);
   const { isOpen, onOpen, onOpenChange } = useDisclosure();
   
   return (
-    <div className={`${styles.profileDropdown}`}>
+    <div className={`${styles.userMenu}`}>
       {!signedIn && 
         <>
           <LoginButton onOpen={onOpen}/>

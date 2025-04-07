@@ -4,7 +4,7 @@ import styles from "../utils/styles";
 const LoginButton = ({ onOpen }: { onOpen: (e: PressEvent) => void}) => {
     return (
         <Button
-            className={`${styles.login}`}
+            className={`${styles.loginButton}`}
             radius="full"
             onPress={onOpen}
           >
