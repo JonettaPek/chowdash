@@ -6,28 +6,23 @@ import { FormEvent, useState } from "react";
 import { useRouter } from "next/navigation";
 import { AiFillGithub } from "react-icons/ai";
 import { FcGoogle } from "react-icons/fc";
-import { EyeFilledIcon, EyeSlashFilledIcon } from "./ShowHideIcon";
+import PasswordVisibilityToggle from "./PasswordVisibilityToggle";
 
 
-const LoginModal = ({ isOpen, onOpenChange }: { isOpen: boolean, onOpenChange: (isOpen: boolean) => void }) => {
+const LoginModal = ({ isOpen, onClose }: { isOpen: boolean, onClose: () => void, onOpenChange?: (isOpen: boolean) => void }) => {
 
     const router = useRouter();
 
     const [email, setEmail] = useState<string>("");
     const [password, setPassword] = useState<string>("");
-    const [isTermsSelected, setIsTermsSelected] = useState<boolean>(true);
     const [errors, setErrors] = useState<{email?: string, password?: string, terms?: string}>({});
     const [isPasswordVisible, setIsPasswordVisible] = useState<boolean>(false);
 
     const onSubmit = (e: FormEvent<HTMLFormElement>, onClose: () => void) => {
         e.preventDefault();
 
-        if (!isTermsSelected) {
-            return;
-        }
-
-        // const data = Object.fromEntries(new FormData(e.currentTarget)) as {email: string, password: string, terms: Terms}; // uncontrolled
-        const data = { email, password, termsAccepted: isTermsSelected } // controlled
+        // const data = Object.fromEntries(new FormData(e.currentTarget)); // uncontrolled
+        const data = { email, password } // controlled
     
         setErrors({});
         console.log(data);// call api
@@ -38,13 +33,12 @@ const LoginModal = ({ isOpen, onOpenChange }: { isOpen: boolean, onOpenChange: (
     const clearInputs = () => {
         setEmail("");
         setPassword("");
-        setIsTermsSelected(true);
     }
 
     return (
-        <Modal isOpen={isOpen} placement="auto" onOpenChange={onOpenChange}>
+        <Modal isOpen={isOpen} onClose={onClose} placement="auto">
             <ModalContent>
-                {(onClose) => (<>
+                {() => (<>
                     <ModalHeader className={styles.loginModalHeader}>Log In</ModalHeader>
                     <ModalBody>
                         <Form
@@ -58,9 +52,7 @@ const LoginModal = ({ isOpen, onOpenChange }: { isOpen: boolean, onOpenChange: (
                                 <Input
                                     isRequired
                                     label="Email"
-                                    labelPlacement="outside"
                                     name="email"
-                                    placeholder="Enter your email"
                                     type="email"
                                     value={email}
                                     onValueChange={(val) => setEmail(val)}
@@ -77,9 +69,7 @@ const LoginModal = ({ isOpen, onOpenChange }: { isOpen: boolean, onOpenChange: (
                                 <Input
                                     isRequired
                                     label="Password"
-                                    labelPlacement="outside"
                                     name="password"
-                                    placeholder="Enter your password"
                                     type={isPasswordVisible ? "text" : "password"}
                                     value={password}
                                     onValueChange={(val) => setPassword(val)}
@@ -88,27 +78,14 @@ const LoginModal = ({ isOpen, onOpenChange }: { isOpen: boolean, onOpenChange: (
                                             return "Please enter your password";
                                         }
                                     }}
-                                    endContent={
-                                        <button
-                                            aria-label="toggle password visibility"
-                                            className="focus:outline-none"
-                                            type="button"
-                                            onClick={() => setIsPasswordVisible((prev) => !prev)}
-                                        >
-                                            {isPasswordVisible ? (
-                                                <EyeSlashFilledIcon className="text-2xl text-default-400 pointer-events-none" />
-                                            ) : (
-                                                <EyeFilledIcon className="text-2xl text-default-400 pointer-events-none" />
-                                            )}
-                                        </button>
-                                      }
+                                    endContent={<PasswordVisibilityToggle isPasswordVisible={isPasswordVisible} setIsPasswordVisible={setIsPasswordVisible}/>}
                                 />
 
                                 {Object.entries(errors).map(([key, error]) => <div key={key}><span className={styles.loginModalCustomError}>{error}</span></div>)}
 
                                 <div className={styles.loginModalFormButtons}>
                                     <Button className="w-full" type="reset" variant="bordered">Clear</Button>
-                                    <Button className="w-full" color="primary" type="submit">Submit</Button>
+                                    <Button className="w-full" color="primary" type="submit">Sign In</Button>
                                 </div>
 
                                 <div className={styles.loginModalLinks}>

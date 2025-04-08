@@ -1,46 +1,76 @@
 'use client'
 
-import { Button, Checkbox, Form, Input, Modal, ModalBody, ModalContent, ModalFooter, ModalHeader } from "@heroui/react";
+import { Button, Checkbox, Form, Input, Modal, ModalBody, ModalContent, ModalFooter, ModalHeader, Select, SelectItem } from "@heroui/react";
 import styles from "../utils/styles";
-import { EyeFilledIcon, EyeSlashFilledIcon } from "./ShowHideIcon";
 import { FormEvent, useState } from "react";
 import { AiFillGithub } from "react-icons/ai";
 import { FcGoogle } from "react-icons/fc";
+import { useRouter } from "next/navigation";
+import PasswordVisibilityToggle from "./PasswordVisibilityToggle";
+import countries from '@/data/countries.json';
+import "./register-modal.css";
 
-const RegisterModal = ({ onOpenChange }: { onOpenChange: () => void }) => {
-    
+const RegisterModal = ({ isOpen, onClose }: { isOpen: boolean, onClose: () => void, onOpenChange?: (isOpen: boolean) => void }) => {
+    const router = useRouter();
+
     const [name, setName] = useState<string>("");
     const [email, setEmail] = useState<string>("");
     const [password, setPassword] = useState<string>("");
     const [confirmPassword, setConfirmPassword] = useState<string>("");
+    const [selectedCountry, setSelectedCountry] = useState<{name: string, flag: string, code: string, dial_code: string}>(countries[0]);
     const [phoneNumber, setPhoneNumber] = useState<string>("")
     const [isTermsSelected, setIsTermsSelected] = useState<boolean>(true);
     const [errors, setErrors] = useState<{email?: string, password?: string, terms?: string}>({});
     const [isPasswordVisible, setIsPasswordVisible] = useState<boolean>(false);
     const [isConfirmPasswordVisible, setIsConfirmPasswordVisible] = useState<boolean>(false);
 
-    const onSubmit = (e: FormEvent<HTMLFormElement>, onClose: () => void) => {
+    const onSubmit = (e: FormEvent<HTMLFormElement>) => {
+        e.preventDefault();
 
+        if (!isTermsSelected) {
+            return;
+        }
+        
+        // const data = Object.fromEntries(new FormData(e.currentTarget)) // uncontrolled
+        const data = { name, email, password, phone_number: selectedCountry.dial_code+phoneNumber, termsAccepted: isTermsSelected }; // controlled
+
+        setErrors({});
+        console.log(data); // call api
+        clearInputs();
+        navigateHome();
     }
+
+    const clearInputs = () => {
+        setName("");
+        setEmail("");
+        setPassword("");
+        setConfirmPassword("");
+        setPhoneNumber("");
+        setIsTermsSelected(true);
+    }
+
+    const navigateHome = () => {
+        router.push("/")
+        onClose();
+    }
+
     return (
-        <Modal isOpen={true} placement="auto" onOpenChange={onOpenChange}>
+        <Modal isOpen={isOpen} onClose={navigateHome} placement="auto">
             <ModalContent>
-                {(onClose) => (<>
+                {() => (<>
                     <ModalHeader className={styles.loginModalHeader}>Create an account</ModalHeader>
                     <ModalBody>
                         <Form
                             className={`${styles.loginModalForm}`}
                             validationErrors={errors} // validationErrors is used for server-side validation errors
-                            onSubmit={(e) => onSubmit(e, onClose)}
+                            onSubmit={onSubmit}
                             autoComplete="off"
                         >
                             <div className={styles.loginModalFormInputs}>
                                 <Input
                                     isRequired
                                     label="Name"
-                                    labelPlacement="outside"
                                     name="name"
-                                    placeholder="Enter your name"
                                     type="text"
                                     value={name}
                                     onValueChange={(val) => setName(val)}
@@ -54,13 +84,11 @@ const RegisterModal = ({ onOpenChange }: { onOpenChange: () => void }) => {
                                 <Input
                                     isRequired
                                     label="Email"
-                                    labelPlacement="outside"
                                     name="email"
-                                    placeholder="Enter your email"
                                     type="email"
                                     value={email}
                                     onValueChange={(val) => setEmail(val)}
-                                    errorMessage={({validationDetails}) => { // errorMessage is used for real-time client-side validation
+                                    errorMessage={({validationDetails}) => {
                                         if (validationDetails.valueMissing) {
                                             return "Please enter your email";
                                         }
@@ -73,9 +101,7 @@ const RegisterModal = ({ onOpenChange }: { onOpenChange: () => void }) => {
                                 <Input
                                     isRequired
                                     label="Password"
-                                    labelPlacement="outside"
                                     name="password"
-                                    placeholder="Enter your password"
                                     type={isPasswordVisible ? "text" : "password"}
                                     value={password}
                                     onValueChange={(val) => setPassword(val)}
@@ -84,49 +110,65 @@ const RegisterModal = ({ onOpenChange }: { onOpenChange: () => void }) => {
                                             return "Please enter your password";
                                         }
                                     }}
-                                    endContent={
-                                        <button
-                                            aria-label="toggle password visibility"
-                                            className="focus:outline-none"
-                                            type="button"
-                                            onClick={() => setIsPasswordVisible((prev) => !prev)}
-                                        >
-                                            {isPasswordVisible ? (
-                                                <EyeSlashFilledIcon className="text-2xl text-default-400 pointer-events-none" />
-                                            ) : (
-                                                <EyeFilledIcon className="text-2xl text-default-400 pointer-events-none" />
-                                            )}
-                                        </button>
-                                    }
+                                    endContent={<PasswordVisibilityToggle isPasswordVisible={isPasswordVisible} setIsPasswordVisible={setIsPasswordVisible}/>}
                                 />
 
                                 <Input
                                     isRequired
                                     label="Confirm Password"
-                                    labelPlacement="outside"
                                     name="confirmPassword"
-                                    placeholder="Re-enter your password"
                                     type={isConfirmPasswordVisible ? "text" : "password"}
                                     value={confirmPassword}
                                     onValueChange={(val) => setConfirmPassword(val)}
+                                    isInvalid={password != confirmPassword}
                                     errorMessage={({validationDetails}) => {
                                         if (validationDetails.valueMissing) {
                                             return "Please enter your password";
                                         }
+                                        if (password != confirmPassword) {
+                                            return "Passwords don't match";
+                                        }
                                     }}
-                                    endContent={
-                                        <button
-                                            aria-label="toggle password visibility"
-                                            className="focus:outline-none"
-                                            type="button"
-                                            onClick={() => setIsConfirmPasswordVisible((prev) => !prev)}
+                                    endContent={<PasswordVisibilityToggle isPasswordVisible={isConfirmPasswordVisible} setIsPasswordVisible={setIsConfirmPasswordVisible}/>}
+                                />
+
+                                <Input
+                                    isRequired
+                                    label="Phone Number"
+                                    name="phoneNumber"
+                                    type="number"
+                                    value={phoneNumber}
+                                    onValueChange={(val) => setPhoneNumber(val)}
+                                    errorMessage={({validationDetails}) => {
+                                        if (validationDetails.valueMissing) {
+                                            return "Please enter your phone number";
+                                        }
+                                        if (validationDetails.typeMismatch) {
+                                            return "Please enter a valid phone number";
+                                        }
+                                    }}
+                                    startContent={
+                                        <Select
+                                            aria-label="country code"
+                                            selectionMode="single"
+                                            style={{border: "none", background: "transparent", paddingTop: 30}}
+                                            startContent={`${selectedCountry.flag} ${selectedCountry.dial_code}`}
+                                            items={countries}
+                                            selectedKeys={[selectedCountry.code]}
+                                            onSelectionChange={(keys) => {
+                                                console.log(Array.from(keys)[0])
+                                                const selected = countries.find(c => c.code === Array.from(keys)[0])
+                                                if (selected) setSelectedCountry(selected)
+                                              }}
                                         >
-                                            {isPasswordVisible ? (
-                                                <EyeSlashFilledIcon className="text-2xl text-default-400 pointer-events-none" />
-                                            ) : (
-                                                <EyeFilledIcon className="text-2xl text-default-400 pointer-events-none" />
+                                            {(country) => (
+                                                <SelectItem
+                                                    key={country.code} textValue={`${country.code}`}
+                                                >
+                                                    {`${country.flag} ${country.dial_code}`}
+                                                </SelectItem>
                                             )}
-                                        </button>
+                                        </Select>
                                     }
                                 />
 

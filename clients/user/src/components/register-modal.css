@@ -1,0 +1,13 @@
+
+[data-slot="innerWrapper"] {
+    width: fit-content;
+}
+
+[data-slot="value"] {
+    width: 0px;
+}
+
+[data-slot="selectorIcon"] {
+    position: relative;
+    width: fit-content;
+}

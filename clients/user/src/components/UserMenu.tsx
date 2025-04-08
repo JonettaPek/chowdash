@@ -14,14 +14,14 @@ import ProfileDropdown from "./ProfileDropdown";
 const UserMenu = () => {
   
   const [signedIn, setSignedIn] = useState<boolean>(false);
-  const { isOpen, onOpen, onOpenChange } = useDisclosure();
+  const { isOpen, onOpen, onClose } = useDisclosure();
   
   return (
     <div className={`${styles.userMenu}`}>
       {!signedIn && 
         <>
           <LoginButton onOpen={onOpen}/>
-          <LoginModal isOpen={isOpen} onOpenChange={onOpenChange} />
+          <LoginModal isOpen={isOpen} onClose={onClose} />
         </>
       }
       {signedIn && <ProfileDropdown />}

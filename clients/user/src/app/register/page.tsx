@@ -2,10 +2,16 @@
 
 import RegisterModal from "@/src/components/RegisterModal";
 import { useDisclosure } from "@heroui/react";
+import { useEffect } from "react";
 
 const RegisterPage = () => {
-    const { isOpen, onOpen, onOpenChange } = useDisclosure();
-    return (<RegisterModal onOpenChange={onOpenChange} />);
+    const { isOpen, onOpen, onClose } = useDisclosure();
+
+    useEffect(() => {
+        onOpen();
+    }, [])
+
+    return (<RegisterModal isOpen={isOpen} onClose={onClose} />);
 }
  
 export default RegisterPage;
