@@ -10,6 +10,11 @@ async function bootstrap() {
   app.setBaseViewsDir(join(process.cwd(), 'apps/users/email-templates')); // sets base directory for template files used in rendering views
   app.setViewEngine('ejs'); // sets Embedded JavaScript (ejs) as the template engine
 
-  await app.listen(process.env.port ?? 3001);
+  app.enableCors({
+    origin: 'http://localhost:3000', // allow requests from frontend
+    // credentials: true,              // if you're using cookies/auth headers
+  });
+
+  await app.listen(process.env.port ?? 4001);
 }
 bootstrap();

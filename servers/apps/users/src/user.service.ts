@@ -13,7 +13,7 @@ interface UserData {
   name: string;
   email: string;
   password: string;
-  phone_number: number;
+  phone_number: string;
 }
 
 @Injectable()

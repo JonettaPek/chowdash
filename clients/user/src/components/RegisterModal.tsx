@@ -8,7 +8,9 @@ import { FcGoogle } from "react-icons/fc";
 import { useRouter } from "next/navigation";
 import PasswordVisibilityToggle from "./PasswordVisibilityToggle";
 import countries from '@/data/countries.json';
-import "./register-modal.css";
+import "@/src/styles/register-modal.css";
+import { useMutation } from "@apollo/client";
+import { REGISTER_MUTATION } from "../graphql/operations/register.operation";
 
 const RegisterModal = ({ isOpen, onClose }: { isOpen: boolean, onClose: () => void, onOpenChange?: (isOpen: boolean) => void }) => {
     const router = useRouter();
@@ -24,7 +26,9 @@ const RegisterModal = ({ isOpen, onClose }: { isOpen: boolean, onClose: () => vo
     const [isPasswordVisible, setIsPasswordVisible] = useState<boolean>(false);
     const [isConfirmPasswordVisible, setIsConfirmPasswordVisible] = useState<boolean>(false);
 
-    const onSubmit = (e: FormEvent<HTMLFormElement>) => {
+    const [registerMutation] = useMutation(REGISTER_MUTATION);
+
+    const onSubmit = async (e: FormEvent<HTMLFormElement>) => {
         e.preventDefault();
 
         if (!isTermsSelected) {
@@ -32,10 +36,14 @@ const RegisterModal = ({ isOpen, onClose }: { isOpen: boolean, onClose: () => vo
         }
         
         // const data = Object.fromEntries(new FormData(e.currentTarget)) // uncontrolled
-        const data = { name, email, password, phone_number: selectedCountry.dial_code+phoneNumber, termsAccepted: isTermsSelected }; // controlled
+        const data = { name, email, password, phone_number: selectedCountry.dial_code+phoneNumber }; // controlled
 
         setErrors({});
-        console.log(data); // call api
+
+        console.log("hi");
+        const response = await registerMutation({ variables: {...data} });
+        console.log(response);
+        console.log("bye")
         clearInputs();
         navigateHome();
     }
@@ -156,7 +164,6 @@ const RegisterModal = ({ isOpen, onClose }: { isOpen: boolean, onClose: () => vo
                                             items={countries}
                                             selectedKeys={[selectedCountry.code]}
                                             onSelectionChange={(keys) => {
-                                                console.log(Array.from(keys)[0])
                                                 const selected = countries.find(c => c.code === Array.from(keys)[0])
                                                 if (selected) setSelectedCountry(selected)
                                               }}
@@ -192,6 +199,23 @@ const RegisterModal = ({ isOpen, onClose }: { isOpen: boolean, onClose: () => vo
                                     <Button className="w-full" type="reset" variant="bordered">Clear</Button>
                                     <Button className="w-full" color="primary" type="submit">Register</Button>
                                 </div>
+
+                                <div className={styles.loginModalLinks}>
+                                    <div>
+                                        <label className="text-xs">Already a user? </label>
+                                        <button
+                                            onClick={() => {
+                                                clearInputs();
+                                                onClose()
+                                                router.push("/login")
+                                            }}
+                                            type="button"
+                                            className={styles.loginModalLink}
+                                        >
+                                        Login
+                                        </button>
+                                    </div>
+                                </div>    
                             </div>
                         </Form>
                         <div className={styles.separator}></div>

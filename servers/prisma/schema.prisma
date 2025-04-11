@@ -31,7 +31,7 @@ model User {
   name String
   email String @unique
   password String
-  phone_number Float @unique
+  phone_number String @unique
   address String?
   avatar Avatar?
   role Role @default(User)

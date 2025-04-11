@@ -1,12 +1,16 @@
-import { Button, PressEvent } from "@heroui/button";
+import { Button } from "@heroui/button";
 import styles from "../utils/styles";
+import { useRouter } from "next/navigation";
 
-const LoginButton = ({ onOpen }: { onOpen: (e: PressEvent) => void}) => {
+const LoginButton = () => {
+    const router = useRouter();
     return (
         <Button
             className={`${styles.loginButton}`}
             radius="full"
-            onPress={onOpen}
+            onPress={() => {
+                router.push("/login");
+            }}
           >
             Log In
         </Button>

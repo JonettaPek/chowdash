@@ -18,16 +18,16 @@ const LoginModal = ({ isOpen, onClose }: { isOpen: boolean, onClose: () => void,
     const [errors, setErrors] = useState<{email?: string, password?: string, terms?: string}>({});
     const [isPasswordVisible, setIsPasswordVisible] = useState<boolean>(false);
 
-    const onSubmit = (e: FormEvent<HTMLFormElement>, onClose: () => void) => {
+    const onSubmit = (e: FormEvent<HTMLFormElement>) => {
         e.preventDefault();
 
         // const data = Object.fromEntries(new FormData(e.currentTarget)); // uncontrolled
         const data = { email, password } // controlled
     
         setErrors({});
-        console.log(data);// call api
+        console.log(data); // call api
         clearInputs();
-        onClose();
+        navigateHome();
     };
 
     const clearInputs = () => {
@@ -35,8 +35,13 @@ const LoginModal = ({ isOpen, onClose }: { isOpen: boolean, onClose: () => void,
         setPassword("");
     }
 
+    const navigateHome = () => {
+        router.push("/");
+        onClose();
+    }
+
     return (
-        <Modal isOpen={isOpen} onClose={onClose} placement="auto">
+        <Modal isOpen={isOpen} onClose={navigateHome} placement="auto">
             <ModalContent>
                 {() => (<>
                     <ModalHeader className={styles.loginModalHeader}>Log In</ModalHeader>
@@ -44,7 +49,7 @@ const LoginModal = ({ isOpen, onClose }: { isOpen: boolean, onClose: () => void,
                         <Form
                             className={`${styles.loginModalForm}`}
                             validationErrors={errors} // validationErrors is used for server-side validation errors
-                            onSubmit={(e) => onSubmit(e, onClose)}
+                            onSubmit={onSubmit}
                             onReset={clearInputs}
                             autoComplete="off"
                         >
